@@ -1,6 +1,8 @@
-package com.hyw.feign.service;
+package com.hyw.feign.service.service.impl;
 
 import org.springframework.stereotype.Component;
+
+import com.hyw.feign.service.service.SchedualService;
 
 @Component
 public class SchedualServiceImpl implements SchedualService {

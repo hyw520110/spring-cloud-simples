@@ -9,14 +9,21 @@
 	<packaging>pom</packaging>
 	 
  	<modules>
-
-		<module>1-config-server</module>
-		<module>2-config-service</module>
+		<module>1-config-server</module>		
+		<module>2-config-client</module>
 		<module>3-eureka-server</module>
 		<module>4-simple-service</module>
 		<module>5-ribbon-service</module>
 		<module>6-feign-service</module>
 		<module>7-zuul-service</module>
+		<module>8-zipkin-server</module>
+		<module>9-user-service</module>
+		<module>10-gateway-service</module>
+		<module>11-turbine-service</module>
+		<module>12-lucy-service</module>
+		<module>13-consul-service</module>
+		<module>14-mongo-service</module>
+		<module>15-redis-service</module>
 	</modules>
 	 
 </project>
