@@ -303,8 +303,8 @@ Spring Cloud是一个拥有诸多子项目的大型综合项目，原则上其�
 作为应用服务，安全性是一个不能忽略的问题，基础设置参考：
 
 - 为服务创建一个独立的用户，同时最好将该用户的shell绑定为/usr/sbin/nologin
-- 赋予最小范围权限：chmod 500 app.jar
-- 阻止修改：sudo chattr +i app.jar
+- 赋予最小范围权限：chmod 500 user.jar
+- 阻止修改：sudo chattr +i user.jar
 - 设置权限所属：
 
 		chmod 400 user.conf
