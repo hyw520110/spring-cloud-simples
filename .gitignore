@@ -6,3 +6,4 @@ target
 .classpath
 .springBeans
 *.log
+*.class
