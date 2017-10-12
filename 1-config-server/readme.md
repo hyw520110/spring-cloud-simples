@@ -69,8 +69,6 @@ Spring cloud使用git或svn存放配置文件，默认情况下使用git，因�
 
 git.uri指定配置文件所在的git工程路径，searchPaths表示将搜索该文件夹下的配置文件
 
-启动程序：访问http://localhost:8888/config/dev,可以看到配置信息证明配置服务中心可以从远程程序获取配置信息。
-
 http请求地址和资源文件映射如下:
 
 - /{application}/{profile}[/{label}]
@@ -79,7 +77,16 @@ http请求地址和资源文件映射如下:
 - /{application}-{profile}.properties
 - /{label}/{application}-{profile}.properties
 
-接下来需创建服务使用远程配置,即应用远程配置
+启动程序：访问：
+
+http://localhost:8888/config/dev
+
+http://localhost:8888/config-dev.yml
+
+http://localhost:8888/config-dev.properties
+
+可以看到配置信息证明配置服务中心可以从远程程序获取配置信息。
+
 
 
 ## 配置中心集群化(高可用分布式配置)
@@ -116,3 +123,71 @@ http请求地址和资源文件映射如下:
 	eureka.client.serviceUrl.defaultZone=http://localhost:8761/eureka/
 
 启动类上加上@EnableEurekaClient的注解
+
+启动注册中心服务(enureka-server)服务，启动多个配置服务config-server，然后需创建服务使用远程配置,即应用远程配置
+
+
+# 配置加密解密
+
+配置文件中的密码等敏感信息，明文存储是不安全的，需要加密存储，使用配置服务时需要解密
+
+加密解密需要依赖 java Cryptography Extension (jce) 
+
+[java6 JCE](http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html)
+
+[java7 JCE](http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html)
+
+[java8 JCE](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html)
+
+下载jce后解压，替换jdk/jre下的jre/lib/security/目录中的两个jar:
+
+	local_policy.jar
+	US_export_policy.jar	  
+### 对称加密
+
+config-server的配置文件中需配置的密钥
+
+	encrypt.key=682bc583f4641835fa2db009355293665d2647dade3375c0ee201de2a49f7bda
+加密：
+
+	curl localhost:8888/encrypt -d abc
+如提示：
+
+	Unable to initialize due to invalid secret ke
+需安装jce替换jar包，重启config-server服务
+
+解密：
+
+	curl localhost:8888/decrypt -d 55dc12bb9588cdce5ce16a09245e13dbcce60b8e4d01c7ae517170abf31f0542
+### 非对称加密
+
+生成证书
+
+cmd进入工程resource目录下执行(或任意目录执行,之后将server.jks文件复制到工程classpath下)
+
+	keytool -genkeypair -alias test -keyalg RSA -dname "CN=china,OU=Unit,O=zhejiang,L=hangzhou,S=State,C=US" -keypass 123456 -keystore server.jks -storepass abcdefg
+
+
+config-server的配置文件中配置：
+	
+	#非对称加密
+	encrypt.key-store.location=server.jks
+	encrypt.key-store.password=abcdefg
+	encrypt.key-store.alias=test
+	encrypt.key-store.secret=123456
+加密：
+
+	curl localhost:8888/encrypt -d abcdefg
+解密：
+
+	curl localhost:8888/decrypt -d AQBf98ev1o3DP1l24JBOsMM+Cc3zpPwbaJNye1g8kgDj0FYOdjplcIq+lxZoSzVrfQ5ezyI2a2ObO/8xWW5kEdiACU0kaytDD+RR/LAacSYiAAKyYOjZMpGb0i/64FOv5MpooWz85S177Aecu27lw9vyUWHuh0wGvLXC6Nf5P75Mom9q7mhcWh63HwT5UREHcy2WxcFjQ4PzoIZxJLWvzVyCFYE5E0XpkiUqvkq+wgrloi5aPEkUCbHtxdafOTHowsbD78/Yrh3N9ZMJazJLO+UDfOu6UXZG9t4VqC5AIGha1Ygcbvw3+lHKFQwzCI+davIaR0eYRTczsLampPHGB/Xjz7kLoH/GUTOkicwVPBY4m74+WKzn0ttQAqNehBDhDVo=
+
+### 存储加密配置
+
+使用{cipher}密文的形式存储
+	
+	spring.datasource.password={cipher}55dc12bb9588cdce5ce16a09245e13dbcce60b8e4d01c7ae517170abf31f0542
+	#spring.datasource.password={cipher}AQBf98ev1o3DP1l24JBOsMM+Cc3zpPwbaJNye1g8kgDj0FYOdjplcIq+lxZoSzVrfQ5ezyI2a2ObO/8xWW5kEdiACU0kaytDD+RR/LAacSYiAAKyYOjZMpGb0i/64FOv5MpooWz85S177Aecu27lw9vyUWHuh0wGvLXC6Nf5P75Mom9q7mhcWh63HwT5UREHcy2WxcFjQ4PzoIZxJLWvzVyCFYE5E0XpkiUqvkq+wgrloi5aPEkUCbHtxdafOTHowsbD78/Yrh3N9ZMJazJLO+UDfOu6UXZG9t4VqC5AIGha1Ygcbvw3+lHKFQwzCI+davIaR0eYRTczsLampPHGB/Xjz7kLoH/GUTOkicwVPBY4m74+WKzn0ttQAqNehBDhDVo=
+其中{cipher}是标识，表示后面的字符串是加密密文，使用时需要被解密
+
+

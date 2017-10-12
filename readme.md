@@ -213,7 +213,108 @@ Spring Cloud是一个拥有诸多子项目的大型综合项目，原则上其�
 
 最初的Angel版本相对来说拥有的子项目较少，Brixton、Camden则拥有更全的子项目，所提供跟多的组件支持。Brixton发布的子项目更稳定，Camden则更具前瞻性
 
- 
+
+# 优雅安全地停止SpringBoot应用服务
+
+
+主要有两种方式：通过HTTP发送shutdown信号，或者通过service stop的方式
+
+## http方式
+
+该方式主要依赖Spring Boot Actuator的endpoint特性
+
+	<dependency>
+	  <groupId>org.springframework.boot</groupId>
+	  <artifactId>spring-boot-starter-actuator</artifactId>
+	</dependency>
+
+开启shutdown endpoint
+
+	
+	#启用shutdown
+	endpoints.shutdown.enabled=true
+	#禁用密码验证
+	endpoints.shutdown.sensitive=false
+需要停止服务时,post请求host:port/shutdown即可:
+
+	curl -X POST host:port/shutdown
+
+### 安全设置
+
+正式使用时，必须对该请求进行必要的安全设置，比如借助spring-boot-starter-security进行身份认证：
+
+	<dependency>
+	  <groupId>org.springframework.boot</groupId>
+	  <artifactId>spring-boot-starter-security</artifactId>
+	</dependency>
+
+开启安全验证
+	
+	
+	#开启shutdown的安全验证
+	endpoints.shutdown.sensitive=true
+	#验证用户名
+	security.user.name=admin
+	#验证密码
+	security.user.password=secret
+	#角色
+	management.security.role=SUPERUSER
+
+	#指定shutdown endpoint的路径
+	endpoints.shutdown.path=/stop
+	#也可以统一指定所有endpoints的路径`management.context-path=/manage`
+	#指定管理端口和IP
+	management.port=8081
+	management.address=127.0.0.1
+
+## 部署服务
+
+该方式主要借助官方的spring-boot-maven-plugin创建"Fully executable" jar ，这中jar包内置一个shell脚本，可以方便的将该应用设置为Unix/Linux的系统服务(init.d service),官方对该功能在CentOS和Ubuntu进行了测试，对于OS X和FreeBSD,可能需要自定义。
+
+### 加入maven插件
+
+	<plugin>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-maven-plugin</artifactId>
+	</plugin>
+
+### 设置为系统服务
+
+	sudo ln -s /var/app/user.jar /etc/init.d/user
+	chmod u+x user.jar
+	sudo service user start|stop
+
+默认PID文件路径：/var/run/user/user.pid
+
+默认日志文件路径：/var/log/user.log
+
+### 自定义参数
+
+可以使用自定义的.conf文件来变更默认配置
+
+在jar包相同路径下创建一个与.jar的名称相同conf文件，如user.conf
+
+	JAVA_HOME=/usr/local/jdk
+	JAVA_OPTS=-Xmx1024M
+	LOG_FOLDER=/custom/log
+
+### 安全设置
+
+作为应用服务，安全性是一个不能忽略的问题，基础设置参考：
+
+- 为服务创建一个独立的用户，同时最好将该用户的shell绑定为/usr/sbin/nologin
+- 赋予最小范围权限：chmod 500 app.jar
+- 阻止修改：sudo chattr +i app.jar
+- 设置权限所属：
+
+		chmod 400 user.conf
+		chown root:root user.conf
+
+# 自定义的销毁方法
+
+- 实现接口：DisposableBean, ExitCodeGenerator
+
+- 使用注解@PreDestroy
 
 
 

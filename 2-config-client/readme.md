@@ -13,7 +13,7 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
     </dependencies>
-bootstrap.properties
+bootstrap.properties配置固定(不更改)配置
 
 	server.port=8881
 	spring.application.name=config-client
@@ -27,21 +27,32 @@ bootstrap.properties
 - config.uri指定远程加载配置信息的地址，就是前面建立的配置管理服务器的地址，绑定端口8888，其中config.port:8888，表示如果在命令行提供了config.port参数，我们就用这个端口，否则就用8888端口。
 - config.name表示配置文件名称，配置文件名称为:config-dev.properties: {application}- {profile}.properties所以我们配置config.name为config，config.profile为dev
 
-程序的入口类，写一个API接口“／hi”，返回从配置中心读取的foo变量的值，代码如下：
+启动类：
 
 	@SpringBootApplication
-	@RestController
 	public class ConfigClientApplication {  
-	    @Value("${logging.level.org.springframework.web}")
-	    String loglevel;
-	    
 	    public static void main(String[] args) {        
 	        SpringApplication.run(ConfigClientApplication.class, args);     
-	    }   
+	    }    
+	}
+写一个API接口从配置中心读取变量的值
+
+	@RestController
+	//@RefreshScope
+	public class ConfigReadController {
+	    @Value("${logging.level.org.springframework.web}")
+	    private String loglevel;
+	    @Value("${mysqldb.datasource.password}")
+	    private String pwd;
 	    
 	    @RequestMapping(value = "/config")
 	    public String loglevel(){
 	        return loglevel;
+	    }
+	    
+	    @RequestMapping(value = "/pwd")
+	    public String pwd(){
+	        return pwd;
 	    }
 	}
 打开网址访问：http://localhost:8881/config,网页显示从config-server获取的属性，而config-server是从git仓库读取的
@@ -67,7 +78,7 @@ bootstrap.properties
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-starter-eureka</artifactId>
     </dependency>
-配置文件bootstrap.properties，注意是bootstrap。加上服务注册地址为http://localhost:8889/eureka/
+配置文件bootstrap.properties，注意是bootstrap
 	
 	server.port=8881
 	spring.application.name=config-client
@@ -87,11 +98,7 @@ bootstrap.properties
 
 在读取配置文件不再写ip地址，而是服务名，这时如果配置服务(config-server)部署多份，通过负载均衡，从而实现高可用。
 
-依次启动eureka-server,config-server,config-client 访问网址：
-
-http://localhost:8889/
-
-http://localhost:8881/config
+依次启动eureka-server,config-server,config-client 访问网址：http://localhost:8881/config
 
 
 

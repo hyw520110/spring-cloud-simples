@@ -122,3 +122,22 @@ windows修改c:/windows/systems/drivers/etc/hosts
 是通过设置ip让eureka让其他服务注册它。
 
 当有服务注册时，两个Eureka-eserver是对等的，它们都存有相同的信息，这就是通过服务器的冗余来增加可靠性，当有一台服务器宕机了，服务并不会终止，因为另一台服务存有相同的数据。
+
+
+# FAQ
+
+服务已经关但是Eureka server里显示服务还是up ，出现一行红色大字：
+
+	EMERGENCY! EUREKA MAY BE INCORRECTLY CLAIMING INSTANCES ARE UP WHEN THEY'RE NOT. RENEWALS ARE LESSER THAN THRESHOLD AND HENCE THE INSTANCES ARE NOT BEING EXPIRED JUST TO BE SAFE.
+原因：自我保护机制。Eureka Server在运行期间，会统计心跳失败的比例在15分钟之内是否低于85%，如果出现低于的情况（在单机调试的时候很容易满足，实际在生产环境上通常是由于网络不稳定导致），Eureka Server会将当前的实例注册信息保护起来，同时提示这个警告。
+
+解决方法：
+
+关闭自我保护
+
+	eureka.server.enable-self-preservation=false
+or: 
+	
+	eureka: 
+		server: 
+			enableSelfPreservation: false  

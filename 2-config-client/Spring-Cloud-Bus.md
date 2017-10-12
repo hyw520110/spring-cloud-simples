@@ -22,14 +22,18 @@ Spring Cloud Bus 将分布式的节点用轻量的消息代理连接起来。它
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
-在配置文件application.properties中加上RabbitMq的配置：
+在配置文件bootstrap.properties中加上RabbitMq的配置：
 
 	spring.rabbitmq.host=localhost
 	spring.rabbitmq.port=5672
 	# spring.rabbitmq.username=
 	# spring.rabbitmq.password=
 
-如果rabbitmq有用户名密码，输入即可。
+注意：
+
+- 启动类或需即时加载配置的类上加上注解：@RefreshScope 否则即使调用/refresh，配置也不会刷新
+- client需要添加spring-boot-starter-actuator依赖，否则访问/refresh将会得到404 
+- 如果rabbitmq有用户名密码，输入即可。
 
 依次启动eureka-server、confg-cserver,启动两个config-service（8881、8882）访问：
 
@@ -37,7 +41,17 @@ http://localhost:8881/config或http://localhost:8882/config
 
 修改git配置中心的相应的参数,如果是传统的做法，需要重启服务，才能达到配置文件的更新。
 
-只需要发送post请求：http://localhost:8881/bus/refresh，再次访问http://localhost:8881/config或http://localhost:8882/config就可以重新读取配置文件
+只需要发送post请求：http://localhost:8881/bus/refresh
+
+如返回提示:
+
+	Full authentication is required to access this resource
+解决：
+
+	#忽略权限拦截
+	management.security.enabled=false
+
+再次访问http://localhost:8881/config或http://localhost:8882/config就可以重新读取配置文件
 
 另外，/bus/refresh接口可以指定服务，即使用”destination”参数，比如 “/bus/refresh?destination=config-service:**” 即刷新服务名为customers的所有服务，不管ip。
 
