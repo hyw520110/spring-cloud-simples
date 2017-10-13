@@ -14,11 +14,20 @@ public class ConfigReadController {
     @Value("${mysqldb.datasource.password}")
     private String pwd;
     
+    /**
+     * 从配置中心获取一个配置项
+     * @author:  heyiwu 
+     * @return
+     */
     @RequestMapping(value = "/loglevel")
     public String loglevel(){
         return loglevel;
     }
-
+    /**
+     * 从配置中心获取一个加密配置项(配置项加密存储，配置中心负责解密)
+     * @author:  heyiwu 
+     * @return
+     */
     @RequestMapping(value = "/pwd")
     public String pwd(){
         return pwd;

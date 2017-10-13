@@ -1,5 +1,6 @@
 package com.hyw.config.client;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +17,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @SpringBootApplication
 @EnableSwagger2
 public class ConfigClientApplication {  
+    @Value("${server.port}")
+    private int port;
     public static void main(String[] args) { 
         SpringApplication.run(ConfigClientApplication.class, args);     
     } 
@@ -32,9 +35,9 @@ public class ConfigClientApplication {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("Swagger2构建RESTful API")
-                .description("Spring Boot中集成swagger2")
-                .termsOfServiceUrl("https://github.com/hyw520110/")
+                .title("应用服务")
+                .description("分布式配置中心客户端")
+                .termsOfServiceUrl("http://localhost:"+port)
                 .contact(new Contact("hyw","https://github.com/hyw520110/","419140278@qq.com"))
                 .version("1.0")
                 .build();

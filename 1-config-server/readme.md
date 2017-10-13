@@ -87,7 +87,13 @@ http://localhost:8888/config-dev.properties
 
 可以看到配置信息证明配置服务中心可以从远程程序获取配置信息。
 
+注意：
 
+如查看yml格式配置时，配置文件中有类似配置：
+	
+	logging.level.org.springframework=INFO
+	logging.level.org.springframework.web=DEBUG
+会报错，原因是不符合yml数据格式:配置项不能同时有值和子项(springframework有值有子项)
 
 ## 配置中心集群化(高可用分布式配置)
 
