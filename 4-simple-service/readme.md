@@ -1,5 +1,8 @@
-# 创建服务提供者(eureka client)
-当client向server注册时，它会提供一些元数据，例如主机和端口，URL，主页等。Eureka server 从每个client实例接收心跳消息。 如果心跳超时，则通常将该实例从注册server中删除。
+# 创建服务提供者
+服务向注册中心注册时，它会提供一些元数据，例如主机和端口，URL，主页等。
+注册中心从每个client实例接收心跳消息。 如果心跳超时，则通常将该实例从注册server中删除。
+
+## 使用eureka注册中心
 
 增加依赖：
 
@@ -11,7 +14,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
-让服务使用eureka服务器，只需添加通过注解@EnableEurekaClient 表明自己是一个eurekaclien
+让服务使用eureka服务器，只需添加通过注解@EnableEurekaClient 表明自己是一个eurekaclient
 
 	@SpringBootApplication
 	@EnableEurekaClient
@@ -53,3 +56,57 @@
 启动工程，打开eureka server的网址：http://localhost:8761 
 
 可以发现一个服务（simple-service）已经注册到注册中心服务中
+
+## 使用zookeeper注册中心
+
+加入依赖：
+
+	<dependency>
+		<groupId>org.springframework.cloud</groupId>
+		<artifactId>spring-cloud-starter-config</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework.cloud</groupId>
+		<artifactId>spring-cloud-starter-zookeeper-discovery</artifactId>
+	</dependency>
+启动类:
+
+	@SpringBootApplication
+	@EnableDiscoveryClient  
+	@RestController
+	public class ZkClientApplication {
+	    @Autowired  
+	    private LoadBalancerClient loadBalancer;  
+	    @Autowired  
+	    private DiscoveryClient discovery; 
+	    
+	    public static void main(String[] args) {
+	        SpringApplication.run(ZkClientApplication.class, args);
+	    }
+	      
+	    @RequestMapping("/discovery")  
+	    public Object discovery() {  
+	        return loadBalancer.choose("zookeeper-server");  
+	    }  
+	      
+	    @RequestMapping("/all")  
+	    public Object all() {  
+	        return discovery.getServices();  
+	    }  
+	}
+
+
+bootstrap.yml
+	
+	server: 
+	  port: 8762  
+	spring: 
+	  application: 
+	    name: simple-zk-service  
+	  cloud: 
+	    zookeeper: 
+	      connectString: localhost:2181  
+	      discovery: 
+	        register: false 
+	
+注释eureka依赖、启动类、配置文件,启动服务,访问：http://localhost:8763/discovery

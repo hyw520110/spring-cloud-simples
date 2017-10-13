@@ -101,4 +101,68 @@ bootstrap.properties配置固定(不更改)配置
 依次启动eureka-server,config-server,config-client 访问网址：http://localhost:8881/config
 
 
+## zookeeper中心化配置
+
+zookeeper中心化配置不需要配置中心服务，即不需要服务端，只需要客户端,即在应用中直接获取配置
+
+依赖：
+
+	<dependency>
+	    <groupId>org.springframework.cloud</groupId>
+	    <artifactId>spring-cloud-starter-zookeeper-config</artifactId>
+	</dependency>
+	<!-- zookeeper 依赖的健康检查 -->
+	<dependency>
+	    <groupId>org.springframework.boot</groupId>
+	    <artifactId>spring-boot-starter-actuator</artifactId>
+	</dependency>
+bootstrap.yml
+
+	server: 
+  		port: 8881 
+	spring:
+	  application:
+	    name: app
+	  #会去/config/application,dev和/config/app,dev(等同application-dev.yml)节点下读取配置  
+	  profiles:
+	      active: dev
+	  cloud:
+	    zookeeper:
+	      # true:开启zookeeper外部化配置, false:读取本地配置; 需要将config.enabled,config.watcher.enabled同时设置
+	      enabled: true
+	      root: config
+	      defaultContext: application
+	      profileSeparator: ","  
+	      connect-string: localhost:2181
+	      config:
+	        enabled: true
+	        watcher:
+	          enabled: true
+这样默认情况下应用会去/config/application,dev 和 /config/app,dev节点下读取配置
+
+注意：
+
+- /config/application节点下的配置项会应用到所有应用
+- /config/app节点配置只应用到对应的应用
+
+zk配置数据脚本
+
+	create /config '' 
+	create /config/application,dev ''
+	create /config/app ''
+	create /config/application,dev/logging.level.org.springframework.web WARN
+	create /config/app/mysqldb.datasource.password 123456
+获取配置
+	
+	@Value("${logging.level.org.springframework.web}")
+	private String logLevel;
+	@Value("${mysqldb.datasource.password}")
+	private String pwd;
+
+获取实时更新配置(更改配置无需重启,自动获取最新配置),只需在类上加上注解@RefreshScope
+
+
+
+
+
 

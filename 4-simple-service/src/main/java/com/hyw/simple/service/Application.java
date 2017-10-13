@@ -1,4 +1,4 @@
-package com.hyw.simple.service;
+/*package com.hyw.simple.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -21,4 +21,4 @@ public class Application {
     public String home(@RequestParam String name) {
         return "hi "+name+",i am from port:" +port;
     }
-}
+}*/

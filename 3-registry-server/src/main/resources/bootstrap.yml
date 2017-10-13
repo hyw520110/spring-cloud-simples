@@ -1,0 +1,20 @@
+server: 
+  port: 8889
+spring:
+  application: 
+    name: registry-server
+  cloud: 
+#zookeeper注册中心  
+#    zookeeper: 
+#      connectString: localhost:2181
+#      discovery: 
+#        instanceHost: 127.0.0.1
+#        instancePort: ${server.port}
+
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        healthCheckPath: ${management.contextPath}/health
+        healthCheckInterval: 15s
+        instance-id: registry-server

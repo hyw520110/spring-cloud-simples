@@ -4,13 +4,17 @@
 
 在分布式系统中，由于服务数量巨多，为了方便服务配置文件统一管理，实时更新，所以需要分布式配置中心组件。
 
-分布式配置框架有：百度的[disconf](https://github.com/knightliao/disconf),阿里的[diamand](https://github.com/takeseem/diamond),spring cloud config
-
 在传统开发中我们往往需要自己开发配置管理服务器:可以使用redis、ldap、zookeeper、db等来存放统一配置信息，然后开发一个管理界面来进行管理。
 
 传统的做法没什么问题，和spring cloud所提供的配置管理方案相比，就是前者需要自己开发，而后者直接简单使用现成的组件即可。当然还有很重要的一点，spring 配置管理模块由于是spring boot核心来实现的，因此做了大量的工作，可以把一些启动参数进行外部配置，这在传统的方案中是很难办到的，因为涉及到要改写第三方组件的问题，难度很大。比如web应用的绑定端口，传统应用只能在tomcat配置文件里改，而spring cloud却可以放到远程，类似的还有数据库连接、安全框架配置等。
 
-在Spring Cloud中，有分布式配置中心组件spring cloud config ，它支持配置服务放在配置服务的内存中（即本地），也支持放在远程Git仓库中。在spring cloud config 组件中，分两个角色，一是config server，二是config client。
+分布式配置框架有：百度的[disconf](https://github.com/knightliao/disconf),阿里的[diamand](https://github.com/takeseem/diamond),spring cloud config
+
+## spring cloud config
+
+支持配置服务放在配置服务的内存中（即本地），也支持放在远程Git仓库中。
+
+在spring cloud config 组件中，分两个角色，一是config server，二是config client。
 
 要使用spring cloud分布式配置文件总体上分为3个大的步骤
 - 首选你需要创建存放配置文件的仓库
@@ -19,7 +23,7 @@
 
 
 
-## 创建配置文件存放仓库
+### 创建配置文件存放仓库
 
 Spring cloud使用git或svn存放配置文件，默认情况下使用git，因此你需要安装git私服或者直接使用互联网上的github或者git.oschina，创建工程config-repo，此工程再创建一个文件夹config来存放配置文件。然后创建两个配置文件：
 
@@ -35,7 +39,7 @@ Spring cloud使用git或svn存放配置文件，默认情况下使用git，因�
 
 配置信息提供了数据库连接参数等，这是因为后面的应用服务中使用到了数据库。
 
-## 创建spring cloud配置服务器(config server)
+### 创建spring cloud配置服务器(config server)
 
 配置文件仓库创建好了后，就需要将配置文件转换为rest接口服务。这个服务器的功能也是spring cloud提供的，所以我们只需要引入相关jar包,设置一下即可。
 
@@ -93,7 +97,15 @@ http://localhost:8888/config-dev.properties
 	
 	logging.level.org.springframework=INFO
 	logging.level.org.springframework.web=DEBUG
-会报错，原因是不符合yml数据格式:配置项不能同时有值和子项(springframework有值有子项)
+会报错，原因是不符合yml数据格式:配置项不能同时有值和子项(springframework有值有子项).
+
+解决/验证：去掉其中一项配置提交配置文件到git仓库，再次访问不报错.或者查看properties等其它格式配置
+
+
+
+具体参考： 
+
+http://cloud.spring.io/spring-cloud-static/spring-cloud-zookeeper/1.0.3.RELEASE/#spring-cloud-zookeeper-config
 
 ## 配置中心集群化(高可用分布式配置)
 

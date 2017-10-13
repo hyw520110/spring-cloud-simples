@@ -1,0 +1,10 @@
+server: 
+  port: 8762  
+spring: 
+  application: 
+    name: simple-zk-service  
+  cloud: 
+    zookeeper: 
+      connectString: localhost:2181  
+      discovery: 
+        register: false 

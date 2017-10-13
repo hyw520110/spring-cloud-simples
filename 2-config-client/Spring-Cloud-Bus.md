@@ -2,6 +2,8 @@
 
 Spring Cloud Bus 将分布式的节点用轻量的消息代理连接起来。它可以用于广播配置文件的更改或者服务之间的通讯，也可以用于监控
 
+spring cloud bus目前仅支持rabbitmq 及 kafka
+## rabbitmq 
 需要下载安装rabbitMq
 
 改造config-client增加依赖：
@@ -54,6 +56,26 @@ http://localhost:8881/config或http://localhost:8882/config
 再次访问http://localhost:8881/config或http://localhost:8882/config就可以重新读取配置文件
 
 另外，/bus/refresh接口可以指定服务，即使用”destination”参数，比如 “/bus/refresh?destination=config-service:**” 即刷新服务名为customers的所有服务，不管ip。
+## kafka
+
+安装并启动kafka服务
+
+加入依赖：
+
+	compile 'org.springframework.cloud:spring-cloud-starter-bus-kafka'
+加入配置
+
+	spring: 
+		cloud: 
+			stream:
+				default-binder: kafka
+				kafka: 
+					brokers: localhost
+					zkNodes: localhost
+					defaultZkPort: 2181
+					defaultBrokerPort: 9092
+				
+
 
 ## 扩展
 

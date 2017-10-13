@@ -1,0 +1,18 @@
+server: 
+  port: 8881 
+spring:
+  application:
+    name: app
+  profiles:
+      active: dev
+  cloud:
+    zookeeper:
+      enabled: true
+      root: config
+      defaultContext: application
+      profileSeparator: ","  
+      connect-string: localhost:2181
+      config:
+        enabled: true
+        watcher:
+          enabled: true
